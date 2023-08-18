@@ -1,3 +1,9 @@
+//
+// Copyright © 2023 adithyagenie
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+//
+
 // ==UserScript==
 // @name         Math Problem Solver
 // @namespace    https://github.com/adithyagenie/skillrack-captcha-solver
