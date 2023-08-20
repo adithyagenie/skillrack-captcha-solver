@@ -7,7 +7,7 @@
 // ==UserScript==
 // @name         Math Problem Solver
 // @namespace    https://github.com/adithyagenie/skillrack-captcha-solver
-// @version      0.1
+// @version      0.2
 // @description  Solves math captcha in SkillRack using Tesseract.js
 // @author       adithyagenie
 // @include      https://*.skillrack.com/*
@@ -26,61 +26,53 @@
 			console.log("Captcha not found!");
 			return;
 		}
+		const time = new Date().getTime();
 
 		// Invert colours for better ocr
-		function invertImageColors(image) {
+		function invertColors(image) {
 			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+
+			// Set canvas dimensions to match the image
 			canvas.width = image.width;
 			canvas.height = image.height;
-			const ctx = canvas.getContext("2d");
-			ctx.drawImage(image, 0, 0, image.width, image.height);
 
-			const imageData = ctx.getImageData(0, 0, image.width, image.height);
-			const data = imageData.data;
+			// Draw the image onto the canvas
+			ctx.drawImage(image, 0, 0);
 
-			for (let i = 0; i < data.length; i += 4) {
-				data[i] = 255 - data[i]; // Red
-				data[i + 1] = 255 - data[i + 1]; // Green
-				data[i + 2] = 255 - data[i + 2]; // Blue
-			}
-
-			ctx.putImageData(imageData, 0, 0);
-			image.src = canvas.toDataURL();
+			// Invert colors using globalCompositeOperation
+			ctx.globalCompositeOperation = "difference";
+			ctx.fillStyle = "white";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			return canvas.toDataURL();
 		}
 
 		function getNums(text) {
-			const a = text
-				.trim()
-				.split(" ")
-				.join("")
-				.replace("=", "")
-				.split("+");
-			return [a[0], a[1]];
+			const a = text.replace(" ", "").replace("=", "").split("+");
+			return parseInt(a[0]) + parseInt(a[1]);
 		}
 
-		invertImageColors(image);
-
+		const invertedimg = invertColors(image);
+		console.log(`Converting image: ${new Date().getTime() - time} ms.`);
 		// Step 2: Image Processing with Tesseract.js
-		Tesseract.recognize(image.src, "eng", { whitelist: "1234567890+=" })
+		Tesseract.recognize(invertedimg, "eng", {
+			whitelist: "1234567890+=",
+			psm: 7,
+		})
 			.then(({ data: { text } }) => {
-				// Step 3: Extract the Math Problem
-				const mathProblem = getNums(text);
-
-				// Step 4: Solve the Math
-				if (mathProblem) {
-					const result =
-						parseInt(mathProblem[0]) + parseInt(mathProblem[1]);
+				console.log(`OCR: ${new Date().getTime() - time} ms.`);
+				// Step 3: Solve the Math Problem
+				try {
+					const result = getNums(text);
 					console.log(
-						"Found math captcha:",
-						mathProblem,
-						"=",
-						result,
-						"Auto-filling answer"
+						"Found math captcha. Auto-filling answer: ",
+						result
 					);
 					textbox.value = result;
 					button.click();
-				} else {
-					console.log("No math problem found in the image text.");
+					console.log(`Took ${new Date().getTime() - time} ms.`);
+				} catch (e) {
+					console.error(e);
 				}
 				return;
 			})
