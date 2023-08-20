@@ -7,7 +7,7 @@
 // ==UserScript==
 // @name         Math Problem Solver
 // @namespace    https://github.com/adithyagenie/skillrack-captcha-solver
-// @version      0.2
+// @version      0.3
 // @description  Solves math captcha in SkillRack using Tesseract.js
 // @author       adithyagenie
 // @include      https://*.skillrack.com/*
@@ -26,6 +26,14 @@
 			console.log("Captcha not found!");
 			return;
 		}
+        const errors = document.getElementsByClassName("ui-growl-item");
+        if (errors.length > 0) {
+            if (errors[0].textContent.includes("Incorrect Captcha")) {
+                console.log("Detected failed attempt at solving captcha");
+                alert("I wasn't able to solve the captcha :/");
+                return;
+            }
+        }
 		const time = new Date().getTime();
 
 		// Invert colours for better ocr
