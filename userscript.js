@@ -7,34 +7,98 @@
 // ==UserScript==
 // @name         Math Problem Solver
 // @namespace    https://github.com/adithyagenie/skillrack-captcha-solver
-// @version      0.3
+// @version      0.4
 // @description  Solves math captcha in SkillRack using Tesseract.js
 // @author       adithyagenie
-// @include      https://*.skillrack.com/*
+// @include      https://www.skillrack.com/faces/candidate/codeprogram.xhtml
+// @include      https://www.skillrack.com/faces/candidate/tutorprogram.xhtml
+// @include      https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml
 // @require https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js
 // ==/UserScript==
 
 (function () {
+	"use strict";
+
+	if (
+		window.location.href ==
+		"https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml"
+	) {
+		if (localStorage.getItem("Solvebtnid"))
+			localStorage.removeItem("Solvebtnid");
+		if (localStorage.getItem("captchaFail"))
+			localStorage.removeItem("captchaFail");
+	}
+	function onClick(event) {
+		// Check if the clicked element is a button
+		if (
+			event.target.tagName === "SPAN" &&
+			event.target.parentNode.tagName === "BUTTON"
+		) {
+			// If so, log the button text
+			if (event.target.textContent === "Solve") {
+				localStorage.setItem("Solvebtnid", event.target.parentNode.id);
+			}
+		}
+	}
+	document.addEventListener("click", onClick, false);
+
 	// Wait for window to load
 	window.addEventListener("load", function () {
+		if (localStorage.getItem("captchaFail")) {
+			console.log(
+				"Detected captcha fail. Attempting to open last open page"
+			);
+			localStorage.removeItem("captchaFail");
+			const old = localStorage.getItem("Solvebtnid");
+			if (old) {
+				const oldbutt = document.getElementById(old);
+				if (oldbutt) oldbutt.click();
+			}
+			return;
+		}
+
 		console.log("Checking for captchas");
 		// Step 1: Get the Image
-		const image = document.getElementById("j_id_6s");
+		let image;
+		if (
+			window.location.href ==
+			"https://www.skillrack.com/faces/candidate/codeprogram.xhtml"
+		)
+			image = document.getElementById("j_id_6s");
+		else if (
+			window.location.href ==
+			"https://www.skillrack.com/faces/candidate/tutorprogram.xhtml"
+		)
+			image = document.getElementById("j_id_5j");
+
 		const textbox = document.getElementById("capval");
 		const button = document.getElementById("proceedbtn");
 		if (image == null) {
-			console.log("Captcha not found!");
+			console.log("Captcha not found.");
 			return;
 		}
-        const errors = document.getElementsByClassName("ui-growl-item");
-        if (errors.length > 0) {
-            if (errors[0].textContent.includes("Incorrect Captcha")) {
-                console.log("Detected failed attempt at solving captcha");
-                alert("I wasn't able to solve the captcha :/");
-                return;
-            }
-        }
+
+		const errors = document.getElementsByClassName("ui-growl-item");
+		if (errors.length > 0) {
+			if (errors[0].textContent.includes("Incorrect Captcha")) {
+				if (
+					window.location.href ==
+					"https://www.skillrack.com/faces/candidate/tutorprogram.xhtml"
+				) {
+					alert("Unable to solve captcha :(");
+					return;
+				}
+				localStorage.setItem("captchaFail", "true");
+				console.log("Detected failed attempt at solving captcha");
+				const back = document.getElementById("j_id_5r");
+				back.click();
+				return;
+			}
+		}
 		const time = new Date().getTime();
+		if (localStorage.getItem("captchaFail")) {
+			localStorage.removeItem("captchaFail");
+		}
 
 		// Invert colours for better ocr
 		function invertColors(image) {
