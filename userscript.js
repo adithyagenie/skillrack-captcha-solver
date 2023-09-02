@@ -5,7 +5,7 @@
 //
 
 // ==UserScript==
-// @name         Math Problem Solver
+// @name         Skillrack Captcha Solver
 // @namespace    https://github.com/adithyagenie/skillrack-captcha-solver
 // @version      0.4
 // @description  Solves math captcha in SkillRack using Tesseract.js
@@ -13,7 +13,7 @@
 // @include      https://www.skillrack.com/faces/candidate/codeprogram.xhtml
 // @include      https://www.skillrack.com/faces/candidate/tutorprogram.xhtml
 // @include      https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml
-// @require https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js
+// @require      https://cdn.jsdelivr.net/npm/tesseract.js@4.1.2/dist/tesseract.min.js
 // ==/UserScript==
 
 (function () {
