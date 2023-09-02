@@ -19,24 +19,29 @@
 (function () {
 	"use strict";
 
+	// Clear all sessionstorage data if going back out of solve.
 	if (
 		window.location.href ==
 		"https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml"
 	) {
-		if (localStorage.getItem("Solvebtnid"))
-			localStorage.removeItem("Solvebtnid");
-		if (localStorage.getItem("captchaFail"))
-			localStorage.removeItem("captchaFail");
+		if (sessionStorage.getItem("Solvebtnid"))
+			sessionStorage.removeItem("Solvebtnid");
+		if (sessionStorage.getItem("captchaFail"))
+			sessionStorage.removeItem("captchaFail");
 	}
+
 	function onClick(event) {
-		// Check if the clicked element is a button
+		// Get solve button click
 		if (
 			event.target.tagName === "SPAN" &&
 			event.target.parentNode.tagName === "BUTTON"
 		) {
-			// If so, log the button text
 			if (event.target.textContent === "Solve") {
-				localStorage.setItem("Solvebtnid", event.target.parentNode.id);
+				// Store button id of problem solve button.
+				sessionStorage.setItem(
+					"Solvebtnid",
+					event.target.parentNode.id
+				);
 			}
 		}
 	}
@@ -44,12 +49,15 @@
 
 	// Wait for window to load
 	window.addEventListener("load", function () {
-		if (localStorage.getItem("captchaFail")) {
+		// Detect if last captcha attempt was a fail to re-nav back
+		if (sessionStorage.getItem("captchaFail")) {
 			console.log(
-				"Detected captcha fail. Attempting to open last open page"
+				"Detected captcha fail. Attempting to open last open page."
 			);
-			localStorage.removeItem("captchaFail");
-			const old = localStorage.getItem("Solvebtnid");
+			// Reset captcha state
+			sessionStorage.removeItem("captchaFail");
+			// Get old button id
+			const old = sessionStorage.getItem("Solvebtnid");
 			if (old) {
 				const oldbutt = document.getElementById(old);
 				if (oldbutt) oldbutt.click();
@@ -58,7 +66,8 @@
 		}
 
 		console.log("Checking for captchas");
-		// Step 1: Get the Image
+		// Get the captcha
+		// Different image ids for tutorial and track websites
 		let image;
 		if (
 			window.location.href ==
@@ -78,6 +87,7 @@
 			return;
 		}
 
+		// Check if past captcha submission was a failure
 		const errors = document.getElementsByClassName("ui-growl-item");
 		if (errors.length > 0) {
 			if (errors[0].textContent.includes("Incorrect Captcha")) {
@@ -88,37 +98,35 @@
 					alert("Unable to solve captcha :(");
 					return;
 				}
-				localStorage.setItem("captchaFail", "true");
+				sessionStorage.setItem("captchaFail", "true");
 				console.log("Detected failed attempt at solving captcha");
 				const back = document.getElementById("j_id_5r");
 				back.click();
 				return;
 			}
 		}
+		// Get time for logging
 		const time = new Date().getTime();
-		if (localStorage.getItem("captchaFail")) {
-			localStorage.removeItem("captchaFail");
+
+		// Clear captcha state
+		if (sessionStorage.getItem("captchaFail")) {
+			sessionStorage.removeItem("captchaFail");
 		}
 
 		// Invert colours for better ocr
 		function invertColors(image) {
 			const canvas = document.createElement("canvas");
 			const ctx = canvas.getContext("2d");
-
-			// Set canvas dimensions to match the image
 			canvas.width = image.width;
 			canvas.height = image.height;
-
-			// Draw the image onto the canvas
 			ctx.drawImage(image, 0, 0);
-
-			// Invert colors using globalCompositeOperation
 			ctx.globalCompositeOperation = "difference";
 			ctx.fillStyle = "white";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			return canvas.toDataURL();
 		}
 
+		// Parse OCR result and solve the problem
 		function getNums(text) {
 			const a = text.replace(" ", "").replace("=", "").split("+");
 			return parseInt(a[0]) + parseInt(a[1]);
@@ -126,14 +134,14 @@
 
 		const invertedimg = invertColors(image);
 		console.log(`Converting image: ${new Date().getTime() - time} ms.`);
-		// Step 2: Image Processing with Tesseract.js
+		// Image Processing with Tesseract.js
 		Tesseract.recognize(invertedimg, "eng", {
 			whitelist: "1234567890+=",
 			psm: 7,
 		})
 			.then(({ data: { text } }) => {
 				console.log(`OCR: ${new Date().getTime() - time} ms.`);
-				// Step 3: Solve the Math Problem
+				// Solve the Math Problem
 				try {
 					const result = getNums(text);
 					console.log(
@@ -141,6 +149,8 @@
 						result
 					);
 					textbox.value = result;
+
+					// Click the submit button
 					button.click();
 					console.log(`Took ${new Date().getTime() - time} ms.`);
 				} catch (e) {
