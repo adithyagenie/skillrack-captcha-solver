@@ -10,10 +10,11 @@
 // @version      0.4
 // @description  Solves math captcha in SkillRack using Tesseract.js
 // @author       adithyagenie
+// @license      AGPL-3.0-or-later
 // @include      https://www.skillrack.com/faces/candidate/codeprogram.xhtml
 // @include      https://www.skillrack.com/faces/candidate/tutorprogram.xhtml
 // @include      https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml
-// @require      https://cdn.jsdelivr.net/npm/tesseract.js@4.1.2/dist/tesseract.min.js
+// @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js
 // ==/UserScript==
 
 (function () {
