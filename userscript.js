@@ -7,15 +7,17 @@
 // ==UserScript==
 // @name         Skillrack Captcha Solver
 // @namespace    https://github.com/adithyagenie/skillrack-captcha-solver
-// @version      0.4
+// @version      0.5
 // @description  Solves math captcha in SkillRack using Tesseract.js
 // @author       adithyagenie
 // @license      AGPL-3.0-or-later
 // @include      https://www.skillrack.com/faces/candidate/codeprogram.xhtml
 // @include      https://www.skillrack.com/faces/candidate/tutorprogram.xhtml
 // @include      https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml
-// @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js
+// @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.0.2/dist/tesseract.min.js
 // ==/UserScript==
+
+const USERNAME = "";
 
 (function () {
 	"use strict";
@@ -74,12 +76,12 @@
 			window.location.href ==
 			"https://www.skillrack.com/faces/candidate/codeprogram.xhtml"
 		)
-			image = document.getElementById("j_id_6s");
+			image = document.getElementById("j_id_6x");
 		else if (
 			window.location.href ==
 			"https://www.skillrack.com/faces/candidate/tutorprogram.xhtml"
 		)
-			image = document.getElementById("j_id_5j");
+			image = document.getElementById("j_id_5o");
 
 		const textbox = document.getElementById("capval");
 		const button = document.getElementById("proceedbtn");
@@ -101,7 +103,7 @@
 				}
 				sessionStorage.setItem("captchaFail", "true");
 				console.log("Detected failed attempt at solving captcha");
-				const back = document.getElementById("j_id_5r");
+				const back = document.getElementById("j_id_5s");
 				back.click();
 				return;
 			}
@@ -126,6 +128,33 @@
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			return canvas.toDataURL();
 		}
+		
+		// Remove username from captcha
+		/**
+         * 
+         * @param {string} text 
+         * @returns 
+         */
+		function removeText(text) {
+		    text = text.replace(USERNAME, "");
+		    let i = text.length - 1;
+		    
+		    i = text.lastIndexOf("+")
+		    if (i == -1) {
+		        console.error("Error parsing username.");
+		        return;
+		    }
+		    i--;
+		    
+		    for (i; i >= 0; i--) {
+		        if (!("1234567890".includes(text[i]))) {
+		            return text.slice(i + 1);
+		        }
+		    }
+		    console.error("Error parsing username.");
+		    return;
+		}
+
 
 		// Parse OCR result and solve the problem
 		function getNums(text) {
@@ -137,14 +166,19 @@
 		console.log(`Converting image: ${new Date().getTime() - time} ms.`);
 		// Image Processing with Tesseract.js
 		Tesseract.recognize(invertedimg, "eng", {
-			whitelist: "1234567890+=",
+			whitelist: "1234567890+=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@ ",
 			psm: 7,
 		})
 			.then(({ data: { text } }) => {
 				console.log(`OCR: ${new Date().getTime() - time} ms.`);
 				// Solve the Math Problem
 				try {
-					const result = getNums(text);
+				    const mathprob = removeText(text);
+					const result = getNums(mathprob);
+					if (isNaN(result)) {
+					    alert(`Unable to solve math captcha... Check the readme file on https://github.com/adithyagenie/skillrack-captcha-solver for instructions on optional username parsing.\n\nSTRING RECOGNISED: ${text}`)
+                        return;
+                    }
 					console.log(
 						"Found math captcha. Auto-filling answer: ",
 						result
