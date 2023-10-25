@@ -7,13 +7,13 @@
 // ==UserScript==
 // @name         Skillrack Captcha Solver
 // @namespace    https://github.com/adithyagenie/skillrack-captcha-solver
-// @version      0.5
+// @version      0.6
 // @description  Solves math captcha in SkillRack using Tesseract.js
 // @author       adithyagenie
 // @license      AGPL-3.0-or-later
-// @include      https://www.skillrack.com/faces/candidate/codeprogram.xhtml
-// @include      https://www.skillrack.com/faces/candidate/tutorprogram.xhtml
-// @include      https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml
+// @include      /https:\/\/(www.)?skillrack\.com\/faces\/candidate\/codeprogram\.xhtml/
+// @include      /https:\/\/(www.)?skillrack\.com\/faces\/candidate\/tutorprogram\.xhtml/
+// @include      /https:\/\/(www.)?skillrack\.com\/faces\/candidate\/codeprogramgroup\.xhtml/
 // @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.0.2/dist/tesseract.min.js
 // ==/UserScript==
 
@@ -24,8 +24,9 @@ const USERNAME = "";
 
 	// Clear all sessionstorage data if going back out of solve.
 	if (
-		window.location.href ==
-		"https://www.skillrack.com/faces/candidate/codeprogramgroup.xhtml"
+		window.location.href.match(
+		/https:\/\/(www.)?skillrack\.com\/faces\/candidate\/codeprogramgroup\.xhtml/gi
+        )
 	) {
 		if (sessionStorage.getItem("Solvebtnid"))
 			sessionStorage.removeItem("Solvebtnid");
@@ -73,13 +74,15 @@ const USERNAME = "";
 		// Different image ids for tutorial and track websites
 		let image;
 		if (
-			window.location.href ==
-			"https://www.skillrack.com/faces/candidate/codeprogram.xhtml"
+			window.location.href.match(
+			/https:\/\/(www.)?skillrack\.com\/faces\/candidate\/codeprogram\.xhtml/gi
+            )
 		)
 			image = document.getElementById("j_id_6x");
 		else if (
-			window.location.href ==
-			"https://www.skillrack.com/faces/candidate/tutorprogram.xhtml"
+			window.location.href.match(
+			/https:\/\/(www.)?skillrack\.com\/faces\/candidate\/tutorprogram\.xhtml/gi
+			)
 		)
 			image = document.getElementById("j_id_5o");
 
@@ -95,8 +98,9 @@ const USERNAME = "";
 		if (errors.length > 0) {
 			if (errors[0].textContent.includes("Incorrect Captcha")) {
 				if (
-					window.location.href ==
-					"https://www.skillrack.com/faces/candidate/tutorprogram.xhtml"
+					window.location.href.match(
+                        /https:\/\/(www.)?skillrack\.com\/faces\/candidate\/tutorprogram\.xhtml/gi
+                        )
 				) {
 					alert("Unable to solve captcha :(");
 					return;
