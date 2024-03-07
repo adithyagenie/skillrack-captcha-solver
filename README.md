@@ -12,17 +12,19 @@ Use GreaseMonkey/TamperMonkey to run the script.
 
 ### Optional username parsing
 
-**You don't need to do this unless you see a warning asking you to do so.**
+**You don't need to do this unless you have a username containing '+' and numbers together.**
 
-The script handles most of the username checking by itself, but if it fails to do so and gives an alert instead, replace the `USERNAME` variable on the top of the script from the string the alert gives.
+The script handles most of the username checking by itself except when the username might contain special symbols which might mimic the captcha. You can fix this by replacing the `USERNAME` variable on the top of the script to match your username from the captcha image.
 
-For example, if the alert says 
+For example, if the captcha is: 
 ```
-STRING RECOGNISED: bch12xyz232@abcd 123+456=
+abcd123+21@xyz
+
+420+69=
 ```
 
-change the first line as 
+change the first line (by visiting the greasemonkey/tampermonkey dashboard) as 
 ```js
-const USERNAME = "bch12xyz232@abcd";
+const USERNAME = "abcd123+21@xyz";
 ```
 and save the script.
