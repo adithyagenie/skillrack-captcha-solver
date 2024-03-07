@@ -11,10 +11,8 @@
 // @description  Solves math captcha in SkillRack using Tesseract.js
 // @author       adithyagenie
 // @license      AGPL-3.0-or-later
-// @include      /https:\/\/(www.)?skillrack\.com\/faces\/candidate\/codeprogram\.xhtml/
-// @include      /https:\/\/(www.)?skillrack\.com\/faces\/candidate\/tutorprogram\.xhtml/
-// @include      /https:\/\/(www.)?skillrack\.com\/faces\/candidate\/codeprogramgroup\.xhtml/
-// @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.0.2/dist/tesseract.min.js
+// @include      /https:\/\/(www\.)?skillrack\.com\/faces\/candidate\/(codeprogram|tutorprogram|codeprogramgroup)\.xhtml/
+// @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js
 // ==/UserScript==
 
 const USERNAME = "";
@@ -135,21 +133,20 @@ const USERNAME = "";
 		
 		// Remove username from captcha
 		/**
-         * 
-         * @param {string} text 
-         * @returns 
+         *
+         * @param {string} text
+         * @returns
          */
 		function removeText(text) {
 		    text = text.replace(USERNAME, "");
 		    let i = text.length - 1;
-		    
-		    i = text.lastIndexOf("+")
+		    i = text.lastIndexOf("+");
 		    if (i == -1) {
+                alert("Oops! I wasn't able to parse the captcha correctly :( Please enter the captcha or try re-visitng again!");
 		        console.error("Error parsing username.");
 		        return;
 		    }
 		    i--;
-		    
 		    for (i; i >= 0; i--) {
 		        if (!("1234567890".includes(text[i]))) {
 		            return text.slice(i + 1);
@@ -171,10 +168,10 @@ const USERNAME = "";
 		// Image Processing with Tesseract.js
 		Tesseract.recognize(invertedimg, "eng", {
 			whitelist: "1234567890+=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@ ",
-			psm: 7,
+			psm: 6,
 		})
 			.then(({ data: { text } }) => {
-				console.log(`OCR: ${new Date().getTime() - time} ms.`);
+				console.log(`OCR: ${new Date().getTime() - time} ms. Result: ${text}`);
 				// Solve the Math Problem
 				try {
 				    const mathprob = removeText(text);
