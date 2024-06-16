@@ -12,7 +12,7 @@
 // @author       adithyagenie
 // @license      AGPL-3.0-or-later
 // @include      /https:\/\/(www\.)?skillrack\.com\/faces\/candidate\/(codeprogram|tutorprogram|codeprogramgroup)\.xhtml/
-// @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js
+// @require      https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js
 // ==/UserScript==
 
 const USERNAME = "";
